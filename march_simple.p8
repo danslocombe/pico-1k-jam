@@ -3,11 +3,21 @@ version 32
 __lua__
 
 
+light_x = -1.5
+light_y = -1.5
+light_z = 1.5
 cube_size = 0.35
 sphere_x = 0
+sphere_z = 0
+--sphere_size = 0.535
+sphere_size = 0.135
+rotate = 0
 function _update60()
   t += 1
-  sphere_x = -0.65*sin(t/800)
+  sphere_z = -0.65*sin(t/800)
+  --light_x = 1.5*cos(t/1000)
+  --light_y = -3 + 1.5*sin(t/1200)
+  rotate += 0.0001
   --sphere_x = 0
   --cube_size = 0.35 + 0.2*sin(t/500)
 end
@@ -26,6 +36,7 @@ function sqr(x)
 end
 
 last_p = {0, 0, 0}
+last_dist = 0
 
 res_x = 32
 res_y = 32
@@ -44,14 +55,30 @@ function rayDir(x, y)
   return normalize({xx, yy, z})
 end
 
+function rotate_x(p, theta)
+  local ct = cos(theta)
+  local st = sin(theta)
+  return {p[1], ct * p[2] - st * p[3], st * p[2] + ct * p[3]}
+end
+
+function rotate_y(p, theta)
+  local ct = cos(theta)
+  local st = sin(theta)
+  return {ct * p[1] + st * p[3], p[2], -st * p[1] + ct * p[3]}
+end
+
 function sceneSDF(p)
   --local dist = vec_len(p) - 0.5
   --dist = max(dist, cubeSDF(p))
   --dist = max(dist, -cubeSDF(p))
 
-  local dist = vec_len({p[1] - sphere_x, p[2], p[3]}) - 0.535
+  --local dist = vec_len({p[1] - sphere_x, p[2], p[3] - sphere_z}) - sphere_size
   --local dist = vec_len(p) - 0.35
-  dist = max(cubeSDF(p), -dist)
+  --dist = max(cubeSDF(p), -dist)
+  --local dist = max(cubeSDF(p), -infCylinderSDF(rotate_y(p, rotate)))
+  local p2 = {p[1] + sphere_z, p[2], p[3]}
+  local dist = cubeSDF(rotate_y(p, rotate))
+  --local dist = cubeSDF(rotate_y(p, rotate))
   return dist 
 end
 
@@ -64,6 +91,9 @@ function cubeSDF(p)
   return inside + outside
 end
 
+function infCylinderSDF(p)
+  return sqrt(sqr(p[1]) + sqr(p[2])) - 0.25
+end
 function march(eye, dir)
   local depth = 0
   local p = {eye[1], eye[2], eye[3]}
@@ -74,12 +104,13 @@ function march(eye, dir)
 
   for i=0,16 do
     local dist = sceneSDF(p)
-    if dist < 0.1 then
+    local last_dist = dist
+    if dist < 0.01 then
       last_p = p
       return depth
     end
 
-    if depth > 5 then
+    if depth > 7 then
       return depth
     end
     
@@ -121,7 +152,7 @@ function _draw()
         --printh("z ".. dir[3])
         local t_0 = stat(1)
         local dir = rays[i]
-        local eye = {0, 0.25, 5}
+        local eye = {0, 0.25, 3}
         local dist = march(eye, dir)
         local t_1 = stat(1)
 
@@ -131,26 +162,35 @@ function _draw()
 
         --local t_2 = 0
         record_time = false
-        if dist < 5 then
+        if dist < 7 then
           --local dist_y_0 = sceneSDF({last_p[1], last_p[2] + 0.05, last_p[3]})
           --local dist_y_1 = sceneSDF({last_p[1], last_p[2] - 0.05, last_p[3]})
-          local dist_x_0 = sceneSDF({last_p[1] - 0.1, last_p[2], last_p[3]})
-          local dist_x_1 = sceneSDF({last_p[1] + 0.1, last_p[2], last_p[3]})
-          local dist_y_0 = sceneSDF({last_p[1], last_p[2] - 0.1, last_p[3]})
-          local dist_y_1 = sceneSDF({last_p[1], last_p[2] + 0.1, last_p[3]})
-          local dist_z_0 = sceneSDF({last_p[1], last_p[2], last_p[3] - 0.1})
-          local dist_z_1 = sceneSDF({last_p[1], last_p[2], last_p[3] + 0.1})
+
+          col = 5
+
+          local k = 0.081
+          local dist_x_0 = sceneSDF({last_p[1] - k, last_p[2], last_p[3]})
+          local dist_x_1 = sceneSDF({last_p[1] + k, last_p[2], last_p[3]})
+          local dist_y_0 = sceneSDF({last_p[1], last_p[2] - k, last_p[3]})
+          local dist_y_1 = sceneSDF({last_p[1], last_p[2] + k, last_p[3]})
+          local dist_z_0 = sceneSDF({last_p[1], last_p[2], last_p[3] - k})
+          local dist_z_1 = sceneSDF({last_p[1], last_p[2], last_p[3] + k})
           local grad_x = dist_x_1 - dist_x_0
           local grad_y = dist_y_1 - dist_y_0
           local grad_z = dist_z_1 - dist_z_0
+          --local grad_x = dist_x_1 - last_dist
+          --local grad_y = dist_y_1 - last_dist
+          --local grad_z = dist_z_1 - last_dist
 
-          local light_dir = normalize({-3.5 - last_p[1], -1.5 - last_p[2], 3 - last_p[3]})
+          local light_dir = normalize({light_x - last_p[1], light_y - last_p[2], light_z - last_p[3]})
 
           local dot = grad_x * light_dir[1] + grad_y * light_dir[2] + grad_z * light_dir[3]
+          dot += rnd(0.005)
 
           if dot < 0 then
             col = 0
           else
+            --col = 7
             col = 4 + dot * 22
           end
 
@@ -194,7 +234,7 @@ function _draw()
     --  end
     --end
   end
-  print(10, 10, stat(6), 7)
+  print(stat(7), 10, 10, 7)
 
   for i,x in pairs(times) do
     printh("t: " .. i)
