@@ -73,10 +73,6 @@ function repxz(p, k)
 end
 
 function sceneSDF(p)
-  --local smallSphere = vec_len({p[1] - sphere_x, p[2], p[3] - sphere_z}) - 0.05
-  --local dist = vec_len(p) - 0.85
-  --dist = min(max(cubeSDF(p), -dist), smallSphere)
-
   local dist = cubeSDF(rotate_x(repxz(p, 2), rotate))
   --local dist = cubeSDF(repxz(p, 4))
   --local dist = cubeSDF(p)
@@ -89,7 +85,81 @@ rotate = 0.18
 eye_z = 6
 eye_x = 0
 
+
+
+function make_note(pitch, instr, vol, effect)
+  return { pitch + 64*(instr%4) , 16*effect + 2*vol + flr(instr/4) } -- flr may be redundant when this is poke'd into memory
+end
+
+function get_note(sfx, time)
+  local addr = 0x3200 + 68*sfx + 2*time
+  return { peek(addr) , peek(addr + 1) }
+end
+
+function set_note(sfx, time, note)
+  local addr = 0x3200 + 68*sfx + 2*time
+  poke(addr, note[1])
+  poke(addr+1, note[2])
+end
+
+function get_speed(sfx)
+  return peek(0x3200 + 68*sfx + 65)
+end
+
+function set_speed(sfx, speed)
+  poke(0x3200 + 68*sfx + 65, speed)
+end
+
+function get_loop_start(sfx)
+  return peek(0x3200 + 68*sfx + 66)
+end
+
+function get_loop_end(sfx)
+  return peek(0x3200 + 68*sfx + 67)
+end
+
+function set_loop(sfx, start, endd)
+  local addr = 0x3200 + 68*sfx
+  poke(addr + 66, start)
+  poke(addr + 67, endd)
+end
+
+--note = make_note(32, 1, 3, 0)
+set_loop(0, 0, 1)
+--poke2(0x3266, 0x0001)
+--poke(0x3200 + 66, 0x00)
+--poke(0x3200 + 67, 0x01)
+sfx(0)
+
+note_pat = {12, 5, 0}
+
 ::main_start::
+  --t=(t+1) % 600*32
+  --t+=1
+  note_off = note_pat[((t() * 5) % 3)\1 + 1]
+  --note = make_note(8+(eye_x*10 % 16), cos(eye_x/7), 3, 0)
+  --note = make_note(8+note_off, cos(eye_x/7), 3, 0)
+  note = make_note(6+(t()\(8) % 2)*2+note_off, 1, 3, 0)
+  --note = make_note(6+note_off, 4+cos(t/4000)\1, 3, 0)
+  set_note(0, 0, note)
+  --[[
+  t+=1 
+  --note = make_note(10+(eye_x*100 % 1), cos(eye_x/7), 3, 0)
+  instr = cos(eye_x/7)
+  sid = 2
+  if (t) % 8 < 1 then
+    sid=2
+    instr = 6
+  end
+  note = make_note(9+(eye_x*9 % 16), instr, 3, 0)
+  set_note(sid, 0, note)
+  set_note(sid, 1, note)
+  set_note(sid, 2, note)
+  --if rnd(10) < 1 then
+    sfx(sid)
+  --end
+  ]]--
+
   --eye_z -= 0.02
   eye_x -= 0.0002
   light_x -= 0.0002
