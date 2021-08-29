@@ -8,15 +8,14 @@ return sc(a)end
 rs={}for i=0,1024do
 r=n({i%32-16,i\32-16,-77})ct,st=.876,-.482rs[i]={ct*r[1]+st*r[3],r[2],-st*r[1]+ct*r[3]}end
 k=.01ex=0lx=-1.5c=.0002poke2(12866,256)sfx(0)np={12,5,0}::s::
-poke2(12800,1536+(70+(t()\8%2)*2+np[((t()*5)%3)\1+1]))ex-=c
+poke2(12800,1606+(t()\8%2)*2+np[t()\.2%3+1])ex-=c
 lx-=c
-cr=cos(lx/25)sr=-sin(lx/26)cc=lx/4i=rnd(1024)\1+1local x,y,d,s,a,m,col,p=i\32,i%32,0,0,rs[i],16,0,{ex,0,6}::ms::if m<1then
-col=2goto d
-end
+cr=cos(lx/25)sr=-sin(lx/26)cc=lx/4i=rnd(1024)\1+1local x,y,d,s,a,m,q,p=i\32,i%32,0,0,rs[i],16,0,{ex,0,6}::ms::
+if(m<1)goto d
 d=sc(p)if d<.2then
-g=n({j(p,1,k)-j(p,1,-k),j(p,2,k)-j(p,2,-k),j(p,3,k)-j(p,3,-k)})ld=n({lx-p[1],-1.5-p[2],-p[3]})f=g[1]*ld[1]+g[2]*ld[2]+g[3]*ld[3]col=0if(f<0)goto d
-col=4+cc+3*sqrt(f)goto d
+g=n({j(p,1,k)-j(p,1,-k),j(p,2,k)-j(p,2,-k),j(p,3,k)-j(p,3,-k)})w=n({lx-p[1],-1.5-p[2],-p[3]})f=g[1]*w[1]+g[2]*w[2]+g[3]*w[3]q=0if(f<0)goto d
+q=4+cc+3*sqrt(f)goto d
 end
-if(s>7)col=cc+2goto d
+if(s>7)q=cc+2goto d
 p[1]+=d*a[1]p[2]+=d*a[2]p[3]+=d*a[3]s+=d
-m-=1goto ms::d::w,v=x*4+rnd(4),y*4+rnd(4)rectfill(w,v,w+4,v+4,col)goto s
+m-=1goto ms::d::w,v=x*4+rnd(4),y*4+rnd(4)rectfill(w,v,w+4,v+4,q)goto s
