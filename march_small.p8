@@ -125,23 +125,23 @@ function set_loop(sfx, start, endd)
 end
 
 --note = make_note(32, 1, 3, 0)
-set_loop(0, 0, 1)
---poke2(0x3266, 0x0001)
---poke(0x3200 + 66, 0x00)
---poke(0x3200 + 67, 0x01)
+--set_loop(0, 0, 1)
+--poke2(0x3242 , 0x0100)
+poke2(12866,256)
 sfx(0)
 
-note_pat = {12, 5, 0}
+note_pat={12, 5, 0}
 
+--poke(0x3201,6)
 ::main_start::
-  --t=(t+1) % 600*32
-  --t+=1
-  note_off = note_pat[((t() * 5) % 3)\1 + 1]
-  --note = make_note(8+(eye_x*10 % 16), cos(eye_x/7), 3, 0)
-  --note = make_note(8+note_off, cos(eye_x/7), 3, 0)
-  note = make_note(6+(t()\(8) % 2)*2+note_off, 1, 3, 0)
-  --note = make_note(6+note_off, 4+cos(t/4000)\1, 3, 0)
-  set_note(0, 0, note)
+  --note = make_note(6+(t()\(8) % 2)*2+note_off, 1, 3, 0)
+  --note = { 6+(t()\8%2)*2+note_off + 64 , 6 }
+  --note = { 70+(t()\8%2)*2+note_off + 64 , 6 }
+  --poke(0x3200, note[1])
+  --poke(0x3201, note[2])
+  --poke(12800,70+(t()\8%2)*2+note_pat[((t() * 5) % 3)\1+1])
+  --poke2(12800,0x600 + (70+(t()\8%2)*2+note_pat[((t() * 5) % 3)\1+1]))
+  poke2(12800,1536+(70+(t()\8%2)*2+note_pat[((t()*5)%3)\1+1]))
   --[[
   t+=1 
   --note = make_note(10+(eye_x*100 % 1), cos(eye_x/7), 3, 0)

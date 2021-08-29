@@ -7,8 +7,8 @@ function j(p,c,k)a={p[1],p[2],p[3]}a[c]+=k
 return sc(a)end
 rs={}for i=0,1024do
 r=n({i%32-16,i\32-16,-77})ct,st=.876,-.482rs[i]={ct*r[1]+st*r[3],r[2],-st*r[1]+ct*r[3]}end
-k=.01ex=0lx=-1.5c=.0002::s::
-ex-=c
+k=.01ex=0lx=-1.5c=.0002poke2(12866,256)sfx(0)np={12,5,0}::s::
+poke2(12800,1536+(70+(t()\8%2)*2+np[((t()*5)%3)\1+1]))ex-=c
 lx-=c
 cr=cos(lx/25)sr=-sin(lx/26)cc=lx/4i=rnd(1024)\1+1local x,y,d,s,a,m,col,p=i\32,i%32,0,0,rs[i],16,0,{ex,0,6}::ms::if m<1then
 col=2goto d
